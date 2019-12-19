@@ -1,36 +1,59 @@
 const express = require('express')
 const cookieParser = require('cookie-parser')
-const port = 3000
+// logs
+const morgan = require('morgan')
+
+//jwt
+const jwt = require('jsonwebtoken')
+
+const port = process.env.PORT || 3000
+
 var app = express()
 app.use(cookieParser())
+
 const prefix='/static'
 
-
 // set a cookie
-app.get('setcookie/',function (req, res, next) {
-  // check if client sent cookie
-  var cookie = req.cookies.cookieName;
-  if (cookie === undefined)
-  {
-    // no: set a new cookie
-    var randomNumber=Math.random().toString();
-    randomNumber=randomNumber.substring(2,randomNumber.length);
-    res.cookie('cookieName',randomNumber, { maxAge: 900000, httpOnly: true });
-    console.log('cookie created successfully');
-  } 
-  else
-  {
-    // yes, cookie was already present 
-    console.log('cookie exists', cookie);
-  } 
+app.get('/validtoken',function (req, res, next) {
+  res.cookie('jwt',"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");
+  console.log('cookie valid token created successfully');
+  next(); // <-- important!
+});
+
+app.get('/invalidtoken',function (req, res, next) {
+  res.cookie('jwt',"eyasdasdasdasdiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");
+  console.log('cookie invalid token created successfully');
   next(); // <-- important!
 });
 
 
 app.get('/cookie',function(req, res){
-    res.send(req.cookies)
+  res.send(req.cookies)
 })
 
 
-app.use(prefix, express.static('Pictures'))
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+
+function checkToken(req,res,next){var morgan = require('morgan')
+token=req.cookies.jwt
+if (token){
+  console.log(token)
+  
+  try {
+    var decoded = jwt.verify(token, 'your-256-bit-secret', { algorithms: ['HS256'] });
+    console.log(decoded)
+    next();
+  } catch(err) {
+    console.log(err)
+    res.status(405).end()
+  }
+} 
+else 
+{
+  res.status(403).end()
+}
+
+}
+
+app.use(prefix,checkToken, express.static('Pictures'))
+app.use(morgan('combined'))
+app.listen(port,() => console.log(`express-jwt listening on port ${port}!`))
