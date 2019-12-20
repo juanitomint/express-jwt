@@ -1,7 +1,7 @@
 const express = require('express')
 const cookieParser = require('cookie-parser')
 // logs
-const morgan = require('morgan')
+var morgan = require('morgan')
 
 //jwt
 const jwt = require('jsonwebtoken')
@@ -13,21 +13,22 @@ app.use(cookieParser())
 
 const prefix='/static'
 
-// set a cookie
+// set a cookie with vallid token
 app.get('/validtoken',function (req, res, next) {
   res.cookie('jwt',"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");
-  console.log('cookie valid token created successfully');
+  res.send('Valid Token set!')
   next(); // <-- important!
 });
 
+// set a cookie with an invallid token
 app.get('/invalidtoken',function (req, res, next) {
   res.cookie('jwt',"eyasdasdasdasdiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");
-  console.log('cookie invalid token created successfully');
+  res.send('In-Valid Token set!')
   next(); // <-- important!
 });
 
 
-app.get('/cookie',function(req, res){
+app.get('/cookies',function(req, res){
   res.send(req.cookies)
 })
 
