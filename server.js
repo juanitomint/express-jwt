@@ -44,12 +44,12 @@ if (token){
     next();
   } catch(err) {
     console.log(err)
-    res.status(405).end()
+    res.status(403).end()
   }
 } 
 else 
 {
-  res.status(403).end()
+  res.status(401).end()
 }
 
 }
